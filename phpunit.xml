@@ -1,0 +1,8 @@
+<?xml  version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="vendor/autoload.php">
+    <!-- test Group name - user_store -->
+    <testsuite name="user_store">
+        <!-- suffix and directory group -->
+        <directory suffix="Test.php">user_store/tests</directory>
+    </testsuite>
+</phpunit>
