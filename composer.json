@@ -5,7 +5,13 @@
     "autoload": {
         "psr-4": {
             "UserStore\\": "user_store/",
-            "UserStore\\Tests\\": "user_store/tests"
+            "UserStore\\Tests\\": "user_store/tests",
+            "Audit\\V1\\": "audit/v1",
+            "Audit\\V1\\Tests\\": "audit/v1/tests",
+            "Audit\\V2\\": "audit/v2",
+            "Audit\\V2\\Tests\\": "audit/v2/tests",
+            "Audit\\V3\\": "audit/v3",
+            "Audit\\V3\\Tests\\": "audit/v3/tests"
         }
     }
 }
