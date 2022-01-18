@@ -18,7 +18,7 @@ class Validator
             return false;
         }
         // check password
-        if ($user['pass'] != $pass) {
+        if ($user['pass'] != $this->store->passwordHash($pass)) {
             $this->store->notifyPasswordFailure($email);
             return false;
         }

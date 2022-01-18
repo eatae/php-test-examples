@@ -5,7 +5,23 @@ namespace UserStore;
 
 class UserStore
 {
-    private array $users = [];
+    private array $users;
+
+    public function __construct()
+    {
+        $this->users = [
+            'bob@gmail.com' => [
+                'pass'  => $this->passwordHash('12345'),
+                'email' => 'bob@gmail.com',
+                'name'  => 'Bob'
+            ],
+            'john@gmail.com' => [
+                'pass'  => $this->passwordHash('12345'),
+                'email' => 'john@gmail.com',
+                'name'  => 'John'
+            ],
+        ];
+    }
 
     public function addUser(string $name, string $email, string $pass): bool
     {
@@ -17,7 +33,7 @@ class UserStore
         }
         // set user
         $this->users[$email] = [
-            'pass' => $pass,
+            'pass' => $this->passwordHash('12345'),
             'email' => $email,
             'name' => $name
         ];
@@ -31,6 +47,7 @@ class UserStore
         if (!empty($user = $this->users[$email])) {
             return $user;
         }
+
         return null;
     }
 
@@ -40,6 +57,12 @@ class UserStore
         if ( isset($this->users[$email]) ) {
             $this->users[$email]['failed'] = time();
         }
+    }
+
+
+    public function passwordHash(string $pass): string
+    {
+        return md5($pass);
     }
 
 

@@ -9,17 +9,17 @@ class UserStoreTest extends TestCase
 {
     private UserStore $store;
     private array $user;
-    private string $userName = 'Bob';
-    private string $userEmail = 'bob@mail.com';
+    private string $userName = 'Alice';
+    private string $userEmail = 'alice@mail.com';
     private string $userPass = '12345';
 
-    public function setup(): void
+    public function setUp(): void
     {
         $this->store = new UserStore();
         $this->user = [
             'name' => $this->userName,
             'email' => $this->userEmail,
-            'pass' => $this->userPass,
+            'pass' => $this->store->passwordHash($this->userPass),
         ];
     }
 
@@ -35,11 +35,15 @@ class UserStoreTest extends TestCase
     public function testGetUser(): void
     {
         // set user
-        $this->store->addUser($this->userName, $this->userEmail, $this->userPass);
+        $this->store->addUser(
+            $this->userName,
+            $this->userEmail,
+            $this->store->passwordHash($this->userPass)
+        );
         // get user
-        $user = $this->store->getUser('bob@mail.com');
+        $savedUser = $this->store->getUser($this->userEmail);
 
-        $this->assertEquals($this->user, $user);
+        $this->assertEquals($this->user, $savedUser);
     }
 
     /**
@@ -59,8 +63,8 @@ class UserStoreTest extends TestCase
     {
         $duplicateName = 'DuplicateName';
         try {
-            $ret = $this->store->addUser($this->userName, $this->userEmail, $this->userPass);
-            $ret = $this->store->addUser($duplicateName, $this->userEmail, $this->userPass);
+            $this->store->addUser($this->userName, $this->userEmail, $this->userPass);
+            $this->store->addUser($duplicateName, $this->userEmail, $this->userPass);
             self::fail('Здесь должно быть вызвано исключение.');
         } catch (\Exception $e) {
             $constraint = $this->logicalAnd(

@@ -10,14 +10,14 @@ use UserStore\Validator;
 class ValidatorTest extends TestCase
 {
     private Validator $validator;
-    private string $userName = 'Bob';
-    private string $userEmail = 'bob@mail.com';
+    private string $userName = 'Alice';
+    private string $userEmail = 'alice@mail.com';
     private string $userPass = '12345';
 
     public function setUp(): void
     {
         $store = new UserStore();
-        $store->addUser($this->userName, $this->userEmail, $this->userPass);
+        $store->addUser($this->userName, $this->userEmail, $store->passwordHash($this->userPass));
         $this->validator = new Validator($store);
     }
 
@@ -30,13 +30,13 @@ class ValidatorTest extends TestCase
     public function testValidateUser_Find(): void
     {
         $this->assertFalse(
-            $this->validator->validateUser('notCorrectEmail', '12345')
+            $this->validator->validateUser('notCorrectEmail', $this->userPass)
         );
         $this->assertFalse(
-            $this->validator->validateUser('bob@mail.com', '123')
+            $this->validator->validateUser($this->userEmail, 'notCorrectPass')
         );
         $this->assertTrue(
-            $this->validator->validateUser('bob@mail.com', '12345')
+            $this->validator->validateUser($this->userEmail, $this->userPass)
         );
     }
 
@@ -53,7 +53,7 @@ class ValidatorTest extends TestCase
             ->with($this->userEmail);
 
         // ожидаем ноль или больше вызовов метода getUser()
-        // который вернёт занчение
+        // который вернёт значение
         $mockStore->expects($this->any())
             ->method('getUser')
             ->will($this->returnValue([
