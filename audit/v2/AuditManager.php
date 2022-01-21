@@ -1,17 +1,20 @@
 <?php
-namespace Audit\V1;
+namespace Audit\V2;
 
 class AuditManager
 {
     private int $_maxEntriesPerFile;
     private string $_directoryPath;
+    private IFileSystem $_fileSystem;
+
     private string $_defaultDirectoryPath;
     private int $_defaultMaxEntriesPerFile = 3;
 
 
-    public function __construct(?int $maxEntriesPerFile = null, ?string $directoryPath = null)
+    public function __construct(IFileSystem $fileSystem, ?int $maxEntriesPerFile = null, ?string $directoryPath = null)
     {
         $this->_defaultDirectoryPath = realpath(__DIR__."/../data");
+        $this->_fileSystem = $fileSystem;
 
         if (null !== $maxEntriesPerFile && $maxEntriesPerFile < 1) {
             throw new \LogicException('Parameter $maxEntriesPerFile: cannot be less than 1.');
@@ -28,14 +31,13 @@ class AuditManager
 
     public function addRecord(string $visitorName, \DateTime $timeOfVisit)
     {
-        $files = array_diff(scandir($this->getDirectoryPath()), array('..', '.'));
+        $files = $this->_fileSystem->getFiles( $this->getDirectoryPath() );
         sort($files);
         $newRecord = $visitorName ." ". $timeOfVisit->format('Y-m-d H:i:s') . PHP_EOL;
 
         if( count($files) == 0 ) {
-            $newFile = fopen($this->getDirectoryPath()."/audit_0.txt", "w") or die("Unable to open file!");
-            fwrite($newFile, $newRecord);
-            fclose($newFile);
+            $newFilePath = $this->getDirectoryPath()."/audit_0.txt";
+            $this->_fileSystem->fileWrite($newFilePath, $newRecord);
 
             return;
         }
@@ -44,21 +46,16 @@ class AuditManager
         $lastFilePath = $this->getDirectoryPath() ."/".$lastFileName;
 
         if ( sizeof(file($lastFilePath)) < $this->getMaxEntriesPerFile() ) {
-            $file = fopen($lastFilePath, "a+") or die("Unable to open file!");
-            fwrite($file, $newRecord);
-            fclose($file);
+            $this->_fileSystem->fileWrite($lastFilePath, $newRecord);
         }
         else {
             $numFile = (int)preg_replace('/[^0-9]/', '', $lastFileName);
-            $newFileName = $this->getDirectoryPath()."/audit_".++$numFile.".txt";
+            $newFilePath = $this->getDirectoryPath()."/audit_".++$numFile.".txt";
 
-            $newFile = fopen( $newFileName, "w") or die("Unable to open file!");
-            fwrite($newFile, $newRecord);
-            fclose($newFile);
+            $this->_fileSystem->fileWrite($newFilePath, $newRecord);
         }
 
     }
-
 
 
     public function getMaxEntriesPerFile(): int
@@ -79,6 +76,11 @@ class AuditManager
     public function getDefaultMaxEntriesPerFile(): string
     {
         return $this->_defaultMaxEntriesPerFile;
+    }
+
+    public function getFileSystem(): IFileSystem
+    {
+        return $this->_fileSystem;
     }
 
 }
