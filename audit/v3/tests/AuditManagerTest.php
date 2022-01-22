@@ -1,9 +1,9 @@
 <?php
-namespace Audit\V2\Tests;
+namespace Audit\V3\Tests;
 
-use Audit\V2\AuditManager;
-use Audit\V2\FileSystem;
-use Audit\V2\IFileSystem;
+use Audit\V3\AuditManager;
+use Audit\V3\FileSystem;
+use Audit\V3\IFileSystem;
 use PHPUnit\Framework\MockObject\MockBuilder;
 use PHPUnit\Framework\TestCase;
 
