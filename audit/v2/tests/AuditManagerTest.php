@@ -1,7 +1,7 @@
 <?php
 namespace Audit\V2\Tests;
 
-use Audit\V1\AuditManager;
+use Audit\V2\AuditManager;
 use Audit\V2\FileSystem;
 use PHPUnit\Framework\MockObject\MockBuilder;
 use PHPUnit\Framework\TestCase;
@@ -54,10 +54,38 @@ class AuditManagerTest extends TestCase
     }
 
 
+
     public function testAddRecord_CreateNewFileAfterOverflow()
     {
-        $fileSystemMock = $this->getMockBuilder(FileSystem::class);
+        // создаём mock и указываем методы, которые будем дальше настраивать
+        $fileSystemMock = $this->getMockBuilder(FileSystem::class)
+            ->onlyMethods(['fileWrite', 'getFiles', 'fileRead'])
+            ->getMock();
 
+        // настраиваем метод getFiles
+        $fileSystemMock->method('getFiles')->willReturn([
+            "audit_1.txt",
+            "audit_2.txt"
+        ]);
+
+        // настраиваем метод fileRead
+        $fileSystemMock->method('fileRead')->willReturn([
+            "Peter 2022-01-21 17:29:11",
+            "Jane 2022-01-21 17:30:22",
+            "Jack 2022-01-21 17:32:33",
+        ]);
+
+        // sut
+        $sut = new AuditManager($fileSystemMock);
+        // Ожидаем вызов метода mock fileWrite() с определенными параметрами
+        // и всё нам не нужно теперь использовать в тесте реальную работу с файловой системой
+        $fileSystemMock->expects($this->once())->method('fileWrite')
+            ->with(
+                $sut->getDirectoryPath()."/audit_3.txt",
+                "Alice 2022-01-21 18:40:00".PHP_EOL)
+        ;
+
+        $sut->addRecord("Alice", new \DateTime('2022-01-21 18:40:00'));
     }
 
 

@@ -31,21 +31,20 @@ class AuditManager
 
     public function addRecord(string $visitorName, \DateTime $timeOfVisit)
     {
-        $files = $this->_fileSystem->getFiles( $this->getDirectoryPath() );
+        $files = $this->_fileSystem->getFiles( $this->_directoryPath );
         sort($files);
         $newRecord = $visitorName ." ". $timeOfVisit->format('Y-m-d H:i:s') . PHP_EOL;
 
         if( count($files) == 0 ) {
-            $newFilePath = $this->getDirectoryPath()."/audit_0.txt";
+            $newFilePath = $this->_directoryPath."/audit_0.txt";
             $this->_fileSystem->fileWrite($newFilePath, $newRecord);
-
             return;
         }
 
         $lastFileName = array_pop($files);
         $lastFilePath = $this->getDirectoryPath() ."/".$lastFileName;
 
-        if ( sizeof(file($lastFilePath)) < $this->getMaxEntriesPerFile() ) {
+        if ( count($this->_fileSystem->fileRead($lastFilePath)) < $this->getMaxEntriesPerFile() ) {
             $this->_fileSystem->fileWrite($lastFilePath, $newRecord);
         }
         else {
