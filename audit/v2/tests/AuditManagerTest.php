@@ -4,7 +4,6 @@ namespace Audit\V2\Tests;
 use Audit\V2\AuditManager;
 use Audit\V2\FileSystem;
 use Audit\V2\IFileSystem;
-use PHPUnit\Framework\MockObject\MockBuilder;
 use PHPUnit\Framework\TestCase;
 
 class AuditManagerTest extends TestCase

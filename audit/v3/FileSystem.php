@@ -2,7 +2,9 @@
 
 namespace Audit\V3;
 
-class FileSystem implements IFileSystem
+use Audit\V3\Interfaces\FileSystem as FS;
+
+class FileSystem implements FS
 {
 
     public function getFiles(string $dir): array

@@ -1,8 +1,8 @@
 <?php
 
-namespace Audit\V3;
+namespace Audit\V3\Interfaces;
 
-interface IFileSystem
+interface FileSystem
 {
     public function getFiles(string $dir): array;
 

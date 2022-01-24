@@ -2,7 +2,9 @@
 
 namespace Audit\V3;
 
-class FileContent
+use Audit\V3\Interfaces\Item;
+
+class FileContent implements Item
 {
     private string $_fileName;
     private array $_lines;
@@ -17,20 +19,24 @@ class FileContent
         $this->_lines = $lines;
     }
 
-    /**
-     * @return string
-     */
     public function getFileName(): string
     {
         return $this->_fileName;
     }
 
-    /**
-     * @return array
-     */
     public function getLines(): array
     {
         return $this->_lines;
+    }
+
+    public function setLine(string $line): void
+    {
+        array_push($this->_lines, $line);
+    }
+
+    public function countLines(): int
+    {
+        return count($this->_lines);
     }
 
 }

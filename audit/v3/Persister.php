@@ -4,15 +4,17 @@ namespace Audit\V3;
 
 class Persister
 {
-    public function readDirectory(string $directoryPath): array
+    public function readDirectory(string $directoryPath, FileCollection $collection): FileCollection
     {
-        $files = [];
+        if (! $collection->isEmpty()) {
+            throw new \Exception("Collection must be empty.");
+        }
         $listFiles = array_diff(scandir($directoryPath), array('..', '.'));
         foreach ($listFiles as $fileName) {
             $content = file($directoryPath."/".$fileName);
-            $files[] = new FileContent($fileName, $content);
+            $collection->addItem(new FileContent($fileName, $content));
         }
-        return $files;
+        return $collection;
     }
 
     public function applyUpdate(string $directoryPath, FileUpdate $fileUpdate): void

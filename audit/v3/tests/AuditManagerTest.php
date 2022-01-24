@@ -2,97 +2,45 @@
 namespace Audit\V3\Tests;
 
 use Audit\V3\AuditManager;
+use Audit\V3\FileCollection;
+use Audit\V3\FileContent;
+use Audit\V3\FileContentSpecifier;
 use Audit\V3\FileSystem;
-use Audit\V3\IFileSystem;
+use Audit\V3\Interfaces\FileSystem as FS;
+use Audit\V3\Persister;
 use PHPUnit\Framework\MockObject\MockBuilder;
 use PHPUnit\Framework\TestCase;
 
 class AuditManagerTest extends TestCase
 {
-    protected IFileSystem $fileSystemStub;
-
-    protected function setUp(): void
-    {
-        $this->fileSystemStub = $this->createMock(FileSystem::class);
-    }
-
     /**
      * Debug SKIPPED
      */
     public function testDebug()
     {
-        //$sut = new AuditManager();
-
-        // addRecord
-        //$sut->addRecord('DebugVisitor', new \DateTime);
-
-        // constructor
-        //var_dump(realpath($sut->getDirectoryPath()));
+        $sut = new AuditManager();
 
         $this->markTestSkipped();
     }
 
-    public function testConstructor()
-    {
-        $sut = new AuditManager($this->fileSystemStub);
-
-        $this->assertEquals($sut->getDefaultMaxEntriesPerFile(), $sut->getMaxEntriesPerFile());
-        $this->assertEquals($sut->getDefaultDirectoryPath(), $sut->getDirectoryPath());
-    }
-
-    public function testConstructor_BadMaxEntriesPerFile()
-    {
-        $maxEntriesPerFile = -1;
-
-        $this->expectException(\LogicException::class);
-        $sut = new AuditManager($this->fileSystemStub, $maxEntriesPerFile);
-        var_dump($sut->getMaxEntriesPerFile());
-    }
-
-    public function testConstructor_BadDirectoryPath()
-    {
-        $maxEntriesPerFile = 3;
-        $directoryPath = __DIR__."/foo";
-
-        $this->expectException(\LogicException::class);
-        $sut = new AuditManager($this->fileSystemStub, $maxEntriesPerFile, $directoryPath);
-        var_dump($sut->getDirectoryPath());
-    }
-
-
-
     public function testAddRecord_CreateNewFileAfterOverflow()
     {
-        // создаём mock и указываем методы, которые будем дальше настраивать
-        $fileSystemMock = $this->getMockBuilder(FileSystem::class)
-            ->onlyMethods(['fileWrite', 'getFiles', 'fileRead'])
-            ->getMock();
-
-        // настраиваем метод getFiles
-        $fileSystemMock->method('getFiles')->willReturn([
-            "audit_1.txt",
-            "audit_2.txt"
-        ]);
-
-        // настраиваем метод fileRead
-        $fileSystemMock->method('fileRead')->willReturn([
+        $sut = new AuditManager();
+        $files = new FileCollection(new FileContentSpecifier());
+        $files->addItem(new FileContent('audit_0.txt', []));
+        $files->addItem(new FileContent('audit_1.txt', [
             "Peter 2022-01-21 17:29:11",
             "Jane 2022-01-21 17:30:22",
             "Jack 2022-01-21 17:32:33",
-        ]);
+        ]));
 
-        // sut
-        $sut = new AuditManager($fileSystemMock);
-        // Ожидаем вызов метода mock fileWrite() с определенными параметрами
-        // и всё нам не нужно теперь использовать в тесте реальную работу с файловой системой
-        $fileSystemMock->expects($this->once())->method('fileWrite')
-            ->with(
-                $sut->getDirectoryPath()."/audit_3.txt",
-                "Alice 2022-01-21 18:40:00".PHP_EOL)
-        ;
+        $fileUpdate = $sut->addRecord(
+            $files,
+            'Alice',
+            new \DateTime('2022-01-24 20:00:00')
+        );
 
-        $sut->addRecord("Alice", new \DateTime('2022-01-21 18:40:00'));
+        $this->assertEquals("audit_2.txt", $fileUpdate->getFileName());
+        $this->assertEquals(['Alice 2022-01-24 20:00:00'.PHP_EOL], $fileUpdate->getContent());
     }
-
-
 }

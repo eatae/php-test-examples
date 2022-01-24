@@ -2,7 +2,9 @@
 
 namespace Audit\V3;
 
-class FileUpdate
+use Audit\V3\Interfaces\Item;
+
+class FileUpdate implements Item
 {
     private string $_fileName;
     private array $_content;
